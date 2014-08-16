@@ -14,7 +14,7 @@ type Bot struct {
 	Options      map[string]bool
 	Data         chan *irc.Message
 	sender       ServerSender
-	callbacks    map[string][]irc.Handler
+	callbacks    map[string][]Callback
 	reader       *irc.Decoder
 	writer       *irc.Encoder
 	conn         net.Conn
@@ -28,7 +28,7 @@ func Classic(server string, name string) *Bot {
 		OriginalName: name,
 		Options:      make(map[string]bool),
 		Data:         make(chan *irc.Message),
-		callbacks:    make(map[string][]irc.Handler),
+		callbacks:    make(map[string][]Callback),
 	}
 	bot.Options["rejoin"] = true    //Rejoin on kick
 	bot.Options["connected"] = true //we are intending to connect
@@ -45,12 +45,14 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
+	b.sender = ServerSender{writer: &b.writer}
 	for _, msg := range b.connectMessages() {
 		err := b.writer.Encode(msg)
 		if err != nil {
 			return err
 		}
 	}
+	log.Println("Connected..")
 	go b.ReadLoop()
 	return nil
 }

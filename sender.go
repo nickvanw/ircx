@@ -2,9 +2,10 @@ package ircx
 
 import "github.com/sorcix/irc"
 
-// ServerSender is a barebones writer used to send messages
+// ServerSender is a barebones writer used
+// as the default sender for all callbacks
 type ServerSender struct {
-	writer *irc.Encoder
+	writer **irc.Encoder
 }
 
 // Send implements the irc.Handler Send method, and merely

@@ -11,22 +11,28 @@ import (
 func (b *Bot) messageCallback(m *irc.Message) {
 	if data, ok := b.callbacks[m.Command]; ok {
 		for _, v := range data {
-			go v.Handle(b.sender, m)
+			if v.Sender == nil {
+				go v.Handler.Handle(b.sender, m)
+			} else {
+				go v.Handler.Handle(v.Sender, m)
+			}
 		}
 	}
 }
 
 // AddCallback is used to add a callback method for a given action
-func (b *Bot) AddCallback(value string, f irc.Handler) {
-	b.callbacks[value] = append(b.callbacks[value], f)
+func (b *Bot) AddCallback(value string, c Callback) {
+	if c.Handler == nil {
+		log.Println("Ignoring nil handler for callback ", value)
+		return
+	}
+	b.callbacks[value] = append(b.callbacks[value], c)
 	log.Println("Added callback for", value)
 }
 
 // CallbackLoop reads from the ReadLoop channel and initiates a
 // callback check for every message it recieves.
 func (b *Bot) CallbackLoop() {
-	// Creates the default transport mechanism for all replies
-	b.sender = ServerSender{writer: b.writer}
 	for {
 		select {
 		case msg, ok := <-b.Data:
@@ -37,4 +43,11 @@ func (b *Bot) CallbackLoop() {
 			}
 		}
 	}
+}
+
+// Callback represents a Handler and a Sender for
+// a specified callback
+type Callback struct {
+	Handler irc.Handler
+	Sender  irc.Sender
 }
