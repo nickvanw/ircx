@@ -1,7 +1,7 @@
 ircx
 ====
 
-ircx is a very basic IRC bot written on top of the wonderfully small [sorcix/irc](https://github.com/sorcix/irc) library. It's designed to be a small building block up, as a small example of one way to use the library.
+ircx is a very basic IRC bot written on top of the wonderfully small [sorcix/irc](https://github.com/sorcix/irc) library. It's designed to be a small building block, a small example of one way to use the library.
 
 Using it is very simple:
 
