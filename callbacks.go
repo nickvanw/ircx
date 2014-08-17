@@ -11,11 +11,7 @@ import (
 func (b *Bot) messageCallback(m *irc.Message) {
 	if data, ok := b.callbacks[m.Command]; ok {
 		for _, v := range data {
-			if v.Sender == nil {
-				go v.Handler.Handle(b.sender, m)
-			} else {
-				go v.Handler.Handle(v.Sender, m)
-			}
+			go v.Handler.Handle(v.Sender, m)
 		}
 	}
 }
@@ -25,6 +21,9 @@ func (b *Bot) AddCallback(value string, c Callback) {
 	if c.Handler == nil {
 		log.Println("Ignoring nil handler for callback ", value)
 		return
+	}
+	if c.Sender == nil {
+		c.Sender = b.sender // if no sender is specified, use default
 	}
 	b.callbacks[value] = append(b.callbacks[value], c)
 	log.Println("Added callback for", value)
@@ -37,7 +36,7 @@ func (b *Bot) CallbackLoop() {
 		select {
 		case msg, ok := <-b.Data:
 			if ok {
-				go b.messageCallback(msg)
+				b.messageCallback(msg)
 			} else {
 				return
 			}

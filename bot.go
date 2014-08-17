@@ -27,7 +27,7 @@ func Classic(server string, name string) *Bot {
 		Server:       server,
 		OriginalName: name,
 		Options:      make(map[string]bool),
-		Data:         make(chan *irc.Message),
+		Data:         make(chan *irc.Message, 10),
 		callbacks:    make(map[string][]Callback),
 	}
 	bot.Options["rejoin"] = true    //Rejoin on kick
@@ -81,6 +81,6 @@ func (b *Bot) ReadLoop() {
 			b.Reconnect()
 			return
 		}
-		go func() { b.Data <- msg }() // Send the data, let it queue if it wants to
+		b.Data <- msg
 	}
 }
