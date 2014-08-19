@@ -11,6 +11,8 @@ import (
 type Bot struct {
 	Server       string
 	OriginalName string
+	Password     string
+	User         string
 	Options      map[string]bool
 	Data         chan *irc.Message
 	sender       ServerSender
@@ -26,6 +28,22 @@ func Classic(server string, name string) *Bot {
 	bot := &Bot{
 		Server:       server,
 		OriginalName: name,
+		User:         name,
+		Options:      make(map[string]bool),
+		Data:         make(chan *irc.Message, 10),
+		callbacks:    make(map[string][]Callback),
+	}
+	bot.Options["rejoin"] = true    //Rejoin on kick
+	bot.Options["connected"] = true //we are intending to connect
+	return bot
+}
+
+func WithLogin(server string, name string, user string, password string) *Bot {
+	bot := &Bot{
+		Server:       server,
+		OriginalName: name,
+		User:         user,
+		Password:     password,
 		Options:      make(map[string]bool),
 		Data:         make(chan *irc.Message, 10),
 		callbacks:    make(map[string][]Callback),
