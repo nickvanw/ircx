@@ -2,6 +2,7 @@ package ircx
 
 import (
 	"log"
+	"math"
 	"net"
 	"time"
 
@@ -20,6 +21,7 @@ type Bot struct {
 	reader       *irc.Decoder
 	writer       *irc.Encoder
 	conn         net.Conn
+	tries        float64
 }
 
 // Classic creates an instance of ircx poised to connect to the given server
@@ -32,6 +34,7 @@ func Classic(server string, name string) *Bot {
 		Options:      make(map[string]bool),
 		Data:         make(chan *irc.Message, 10),
 		callbacks:    make(map[string][]Callback),
+		tries:        0,
 	}
 	bot.Options["rejoin"] = true    //Rejoin on kick
 	bot.Options["connected"] = true //we are intending to connect
@@ -47,6 +50,7 @@ func WithLogin(server string, name string, user string, password string) *Bot {
 		Options:      make(map[string]bool),
 		Data:         make(chan *irc.Message, 10),
 		callbacks:    make(map[string][]Callback),
+		tries:        0,
 	}
 	bot.Options["rejoin"] = true    //Rejoin on kick
 	bot.Options["connected"] = true //we are intending to connect
@@ -55,7 +59,6 @@ func WithLogin(server string, name string, user string, password string) *Bot {
 
 // Connect attempts to connect to the given IRC server
 func (b *Bot) Connect() error {
-	log.Println("Connecting..")
 	conn, err := net.Dial("tcp", b.Server)
 	if err != nil {
 		return err
@@ -70,7 +73,8 @@ func (b *Bot) Connect() error {
 			return err
 		}
 	}
-	log.Println("Connected..")
+	log.Println("Connected to", b.Server)
+	b.tries = 0
 	go b.ReadLoop()
 	return nil
 }
@@ -81,10 +85,13 @@ func (b *Bot) Reconnect() {
 	data, ok := b.Options["connected"]
 	if data || !ok {
 		b.conn.Close()
-		log.Println("Reconnecting..")
-		b.Connect()
+		for err := b.Connect(); err != nil; err = b.Connect() {
+			duration := time.Duration(math.Pow(2.0, b.tries)*200) * time.Millisecond
+			log.Println("Unable to connect to", b.Server, "- waiting", duration)
+			time.Sleep(duration)
+			b.tries++
+		}
 	} else {
-		log.Println("Leaving, bye.")
 		close(b.Data)
 	}
 }

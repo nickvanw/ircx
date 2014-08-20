@@ -26,7 +26,6 @@ func (b *Bot) AddCallback(value string, c Callback) {
 		c.Sender = b.sender // if no sender is specified, use default
 	}
 	b.callbacks[value] = append(b.callbacks[value], c)
-	log.Println("Added callback for", value)
 }
 
 // CallbackLoop reads from the ReadLoop channel and initiates a
