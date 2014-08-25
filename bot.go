@@ -103,6 +103,7 @@ func (b *Bot) ReadLoop() {
 		b.conn.SetDeadline(time.Now().Add(300 * time.Second))
 		msg, err := b.reader.Decode()
 		if err != nil {
+			log.Println("Error:", err)
 			b.Reconnect()
 			return
 		}
