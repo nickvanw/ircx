@@ -41,14 +41,14 @@ func RegisterHandlers(bot *ircx.Bot) {
 	bot.AddCallback(irc.PING, ircx.Callback{Handler: irc.HandlerFunc(PingHandler)})
 }
 
-func RegisterConnect(s irc.Sender, m *irc.Message) {
+func RegisterConnect(s ircx.Sender, m *irc.Message) {
 	s.Send(&irc.Message{
 		Command: irc.JOIN,
 		Params:  []string{*channels},
 	})
 }
 
-func PingHandler(s irc.Sender, m *irc.Message) {
+func PingHandler(s ircx.Sender, m *irc.Message) {
 	s.Send(&irc.Message{
 		Command:  irc.PONG,
 		Params:   m.Params,
