@@ -46,6 +46,20 @@ func (b *Bot) CallbackLoop() {
 // Callback represents a Handler and a Sender for
 // a specified callback
 type Callback struct {
-	Handler irc.Handler
-	Sender  irc.Sender
+	Handler Handler
+	Sender  Sender
+}
+
+type Handler interface {
+	Handle(Sender, *irc.Message)
+}
+
+type Sender interface {
+	Send(*irc.Message) error
+}
+
+type HandlerFunc func(s Sender, m *irc.Message)
+
+func (f HandlerFunc) Handle(s Sender, m *irc.Message) {
+	f(s, m)
 }
