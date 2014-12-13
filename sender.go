@@ -12,5 +12,6 @@ type ServerSender struct {
 // sends the given message, returning any errors that may have
 // occured
 func (m ServerSender) Send(msg *irc.Message) error {
-	return m.writer.Encode(msg)
+	writer := *m.writer
+	return writer.Encode(msg)
 }
