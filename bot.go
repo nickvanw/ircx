@@ -24,37 +24,42 @@ type Bot struct {
 	tries        float64
 }
 
+func NewBot(f ...func(*Bot)) *Bot {
+	defaultOpts := map[string]bool{
+		"rejoin":    true,
+		"connected": true,
+	}
+	b := &Bot{
+		Options:   defaultOpts,
+		Data:      make(chan *irc.Message),
+		callbacks: make(map[string][]Callback),
+		tries:     0,
+	}
+	for _, v := range f {
+		v(b)
+	}
+	return b
+}
+
 // Classic creates an instance of ircx poised to connect to the given server
 // with the given IRC name.
 func Classic(server string, name string) *Bot {
-	bot := &Bot{
-		Server:       server,
-		OriginalName: name,
-		User:         name,
-		Options:      make(map[string]bool),
-		Data:         make(chan *irc.Message, 10),
-		callbacks:    make(map[string][]Callback),
-		tries:        0,
+	configFunc := func(b *Bot) {
+		b.Server = server
+		b.OriginalName = name
+		b.User = name
 	}
-	bot.Options["rejoin"] = true    //Rejoin on kick
-	bot.Options["connected"] = true //we are intending to connect
-	return bot
+	return NewBot(configFunc)
 }
 
 func WithLogin(server string, name string, user string, password string) *Bot {
-	bot := &Bot{
-		Server:       server,
-		OriginalName: name,
-		User:         user,
-		Password:     password,
-		Options:      make(map[string]bool),
-		Data:         make(chan *irc.Message, 10),
-		callbacks:    make(map[string][]Callback),
-		tries:        0,
+	configFunc := func(b *Bot) {
+		b.Server = server
+		b.OriginalName = name
+		b.User = user
+		b.Password = password
 	}
-	bot.Options["rejoin"] = true    //Rejoin on kick
-	bot.Options["connected"] = true //we are intending to connect
-	return bot
+	return NewBot(configFunc)
 }
 
 // Connect attempts to connect to the given IRC server
@@ -87,7 +92,7 @@ func (b *Bot) Reconnect() {
 		b.conn.Close()
 		for err := b.Connect(); err != nil; err = b.Connect() {
 			duration := time.Duration(math.Pow(2.0, b.tries)*200) * time.Millisecond
-			log.Println("Unable to connect to", b.Server, "- waiting", duration)
+			log.Printf("Unable to connect to %s, waiting %s", b.Server, duration.String())
 			time.Sleep(duration)
 			b.tries++
 		}
