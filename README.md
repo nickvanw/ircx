@@ -38,8 +38,8 @@ func main() {
 }
 
 func RegisterHandlers(bot *ircx.Bot) {
-	bot.AddCallback(irc.RPL_WELCOME, ircx.Callback{Handler: irc.HandlerFunc(RegisterConnect)})
-	bot.AddCallback(irc.PING, ircx.Callback{Handler: irc.HandlerFunc(PingHandler)})
+	bot.AddCallback(irc.RPL_WELCOME, ircx.Callback{Handler: ircx.HandlerFunc(RegisterConnect)})
+	bot.AddCallback(irc.PING, ircx.Callback{Handler: ircx.HandlerFunc(PingHandler)})
 }
 
 func RegisterConnect(s ircx.Sender, m *irc.Message) {
