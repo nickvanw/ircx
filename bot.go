@@ -1,6 +1,7 @@
 package ircx
 
 import (
+	"crypto/tls"
 	"log"
 	"math"
 	"net"
@@ -16,6 +17,7 @@ type Bot struct {
 	User         string
 	Options      map[string]bool
 	Data         chan *irc.Message
+	tlsConfig    *tls.Config
 	sender       ServerSender
 	callbacks    map[string][]Callback
 	reader       *irc.Decoder
@@ -62,9 +64,44 @@ func WithLogin(server string, name string, user string, password string) *Bot {
 	return NewBot(configFunc)
 }
 
+// WithTLS creates an instance of ircx poised to connect to the given server
+// using TLS with the given IRC name.
+func WithTLS(server string, name string, tlsConfig *tls.Config) *Bot {
+	if tlsConfig == nil {
+		tlsConfig = &tls.Config{}
+	}
+	configFunc := func(b *Bot) {
+		b.Server = server
+		b.OriginalName = name
+		b.User = name
+		b.tlsConfig = tlsConfig
+	}
+	return NewBot(configFunc)
+}
+
+func WithLoginTLS(server string, name string, user string, password string, tlsConfig *tls.Config) *Bot {
+	if tlsConfig == nil {
+		tlsConfig = &tls.Config{}
+	}
+	configFunc := func(b *Bot) {
+		b.Server = server
+		b.OriginalName = name
+		b.User = user
+		b.Password = password
+		b.tlsConfig = tlsConfig
+	}
+	return NewBot(configFunc)
+}
+
 // Connect attempts to connect to the given IRC server
 func (b *Bot) Connect() error {
-	conn, err := net.Dial("tcp", b.Server)
+	var conn net.Conn
+	var err error
+	if b.tlsConfig == nil {
+		conn, err = net.Dial("tcp", b.Server)
+	} else {
+		conn, err = tls.Dial("tcp", b.Server, b.tlsConfig)
+	}
 	if err != nil {
 		return err
 	}
