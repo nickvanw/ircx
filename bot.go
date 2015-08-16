@@ -2,7 +2,6 @@ package ircx
 
 import (
 	"crypto/tls"
-	"log"
 	"math"
 	"net"
 	"time"
@@ -20,14 +19,15 @@ type Bot struct {
 	reader       *irc.Decoder
 	writer       *irc.Encoder
 	conn         net.Conn
-	tries        float64
+	tries        int
 }
 
 type Config struct {
-	Password  string
-	User      string
-	Options   map[string]bool
-	TLSConfig *tls.Config
+	Password   string
+	User       string
+	Options    map[string]bool
+	TLSConfig  *tls.Config
+	MaxRetries int
 }
 
 func New(server, name string, config Config) *Bot {
@@ -63,7 +63,6 @@ func (b *Bot) Connect() error {
 			return err
 		}
 	}
-	log.Println("Connected to", b.Server)
 	b.tries = 0
 	go b.ReadLoop()
 	return nil
@@ -71,29 +70,29 @@ func (b *Bot) Connect() error {
 
 // Reconnect checks to make sure we want to, and then attempts to
 // reconnect to the server
-func (b *Bot) Reconnect() {
-	if b.Config.Options["connected"] {
+func (b *Bot) Reconnect() error {
+	if b.Config.MaxRetries > 0 {
 		b.conn.Close()
-		for err := b.Connect(); err != nil; b.tries++ {
-			duration := time.Duration(math.Pow(2.0, b.tries)*200) * time.Millisecond
-			log.Printf("err %s connecting to %s, waiting %s", err, b.Server, duration.String())
+		var err error
+		for err = b.Connect(); err != nil && b.tries < b.Config.MaxRetries; b.tries++ {
+			duration := time.Duration(math.Pow(2.0, float64(b.tries))*200) * time.Millisecond
 			time.Sleep(duration)
 		}
+		return err
 	} else {
 		close(b.Data)
 	}
+	return nil
 }
 
 // ReadLoop sets a timeout of 300 seconds, and then attempts to read
 // from the IRC server. If there is an error, it calls Reconnect
-func (b *Bot) ReadLoop() {
+func (b *Bot) ReadLoop() error {
 	for {
 		b.conn.SetDeadline(time.Now().Add(300 * time.Second))
 		msg, err := b.reader.Decode()
 		if err != nil {
-			log.Println("Error:", err)
-			b.Reconnect()
-			return
+			return b.Reconnect()
 		}
 		b.Data <- msg
 	}

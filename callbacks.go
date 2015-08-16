@@ -1,10 +1,12 @@
 package ircx
 
 import (
-	"log"
+	"errors"
 
 	"github.com/sorcix/irc"
 )
+
+var ErrInvalidHandler = errors.New("invalid handler specified for callback")
 
 // messageCallback is called on every message recieved from the IRC
 // server, checking to see if there are any actions that need to be performed
@@ -17,15 +19,15 @@ func (b *Bot) messageCallback(m *irc.Message) {
 }
 
 // AddCallback is used to add a callback method for a given action
-func (b *Bot) AddCallback(value string, c Callback) {
+func (b *Bot) AddCallback(value string, c Callback) error {
 	if c.Handler == nil {
-		log.Println("Ignoring nil handler for callback ", value)
-		return
+		return ErrInvalidHandler
 	}
 	if c.Sender == nil {
 		c.Sender = b.Sender // if no sender is specified, use default
 	}
 	b.callbacks[value] = append(b.callbacks[value], c)
+	return nil
 }
 
 // CallbackLoop reads from the ReadLoop channel and initiates a
