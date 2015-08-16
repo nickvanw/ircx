@@ -6,10 +6,10 @@ import "github.com/sorcix/irc"
 // connect to the IRC server.
 func (b *Bot) connectMessages() []*irc.Message {
 	messages := []*irc.Message{}
-	if b.Password != "" {
+	if b.Config.Password != "" {
 		messages = append(messages, &irc.Message{
 			Command: irc.PASS,
-			Params:  []string{b.Password},
+			Params:  []string{b.Config.Password},
 		})
 	}
 	messages = append(messages, &irc.Message{
@@ -18,8 +18,8 @@ func (b *Bot) connectMessages() []*irc.Message {
 	})
 	messages = append(messages, &irc.Message{
 		Command:  irc.USER,
-		Params:   []string{b.User, "0", "*"},
-		Trailing: b.User,
+		Params:   []string{b.Config.User, "0", "*"},
+		Trailing: b.Config.User,
 	})
 	return messages
 }

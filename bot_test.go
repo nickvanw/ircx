@@ -9,35 +9,33 @@ import (
 	"time"
 )
 
-func TestNewBot(t *testing.T) {
-	config := func(b *Bot) {
-		b.Server = "irc.example.org"
-		b.OriginalName = "test-bot"
-		b.User = "test-user"
-	}
+func TestNew(t *testing.T) {
 	wantOpts := map[string]bool{
 		"rejoin":    true,
 		"connected": true,
 	}
-	b := NewBot(config)
+	cfg := Config{
+		Options: wantOpts,
+		User:    "test-user",
+	}
+	b := New("irc.example.org", "test-bot", cfg)
 	if b.Server != "irc.example.org" {
 		t.Fatalf("Wanted server %s, got %s", "irc.example.org", b.Server)
 	}
 	if b.OriginalName != "test-bot" {
 		t.Fatalf("Wanted name %s, got %s", "test-bot", b.OriginalName)
 	}
-	if b.User != "test-user" {
-		t.Fatalf("Wanted user %s, got %s", "test-user", b.User)
+	if b.Config.User != "test-user" {
+		t.Fatalf("Wanted user %s, got %s", "test-user", b.Config.User)
 	}
-	if !reflect.DeepEqual(b.Options, wantOpts) {
-		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Options)
+	if !reflect.DeepEqual(b.Config.Options, wantOpts) {
+		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Config.Options)
 	}
 }
 
 func TestClassicHelper(t *testing.T) {
 	b := Classic("irc.example.org", "test-bot")
 	wantOpts := map[string]bool{
-		"rejoin":    true,
 		"connected": true,
 	}
 	if b.Server != "irc.example.org" {
@@ -46,18 +44,17 @@ func TestClassicHelper(t *testing.T) {
 	if b.OriginalName != "test-bot" {
 		t.Fatalf("Wanted name %s, got %s", "test-bot", b.OriginalName)
 	}
-	if b.User != "test-bot" {
-		t.Fatalf("Wanted user %s, got %s", "test-bot", b.User)
+	if b.Config.User != "test-bot" {
+		t.Fatalf("Wanted user %s, got %s", "test-bot", b.Config.User)
 	}
-	if !reflect.DeepEqual(b.Options, wantOpts) {
-		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Options)
+	if !reflect.DeepEqual(b.Config.Options, wantOpts) {
+		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Config.Options)
 	}
 }
 
 func TestPasswordHelper(t *testing.T) {
 	b := WithLogin("irc.example.org", "test-bot", "test-user", "test-password")
 	wantOpts := map[string]bool{
-		"rejoin":    true,
 		"connected": true,
 	}
 	if b.Server != "irc.example.org" {
@@ -66,14 +63,14 @@ func TestPasswordHelper(t *testing.T) {
 	if b.OriginalName != "test-bot" {
 		t.Fatalf("Wanted name %s, got %s", "test-bot", b.OriginalName)
 	}
-	if b.User != "test-user" {
-		t.Fatalf("Wanted user %s, got %s", "test-user", b.User)
+	if b.Config.User != "test-user" {
+		t.Fatalf("Wanted user %s, got %s", "test-user", b.Config.User)
 	}
-	if b.Password != "test-password" {
-		t.Fatalf("Wanted password %s, got %s", "test-password", b.Password)
+	if b.Config.Password != "test-password" {
+		t.Fatalf("Wanted password %s, got %s", "test-password", b.Config.Password)
 	}
-	if !reflect.DeepEqual(b.Options, wantOpts) {
-		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Options)
+	if !reflect.DeepEqual(b.Config.Options, wantOpts) {
+		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Config.Options)
 	}
 }
 
