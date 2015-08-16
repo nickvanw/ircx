@@ -13,16 +13,14 @@ import (
 type Bot struct {
 	Server       string
 	OriginalName string
-
-	Config Config
-	Data   chan *irc.Message
-
-	sender    ServerSender
-	callbacks map[string][]Callback
-	reader    *irc.Decoder
-	writer    *irc.Encoder
-	conn      net.Conn
-	tries     float64
+	Config       Config
+	Data         chan *irc.Message
+	Sender       ServerSender
+	callbacks    map[string][]Callback
+	reader       *irc.Decoder
+	writer       *irc.Encoder
+	conn         net.Conn
+	tries        float64
 }
 
 type Config struct {
@@ -59,7 +57,7 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
-	b.sender = ServerSender{writer: &b.writer}
+	b.Sender = ServerSender{writer: &b.writer}
 	for _, msg := range b.connectMessages() {
 		if err := b.writer.Encode(msg); err != nil {
 			return err
