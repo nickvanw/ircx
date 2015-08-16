@@ -23,7 +23,7 @@ func (b *Bot) AddCallback(value string, c Callback) {
 		return
 	}
 	if c.Sender == nil {
-		c.Sender = b.sender // if no sender is specified, use default
+		c.Sender = b.Sender // if no sender is specified, use default
 	}
 	b.callbacks[value] = append(b.callbacks[value], c)
 }
