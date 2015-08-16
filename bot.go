@@ -18,7 +18,7 @@ type Bot struct {
 	Options      map[string]bool
 	Data         chan *irc.Message
 	tlsConfig    *tls.Config
-	sender       ServerSender
+	Sender       ServerSender
 	callbacks    map[string][]Callback
 	reader       *irc.Decoder
 	writer       *irc.Encoder
@@ -108,7 +108,7 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
-	b.sender = ServerSender{writer: &b.writer}
+	b.Sender = ServerSender{writer: &b.writer}
 	for _, msg := range b.connectMessages() {
 		err := b.writer.Encode(msg)
 		if err != nil {
