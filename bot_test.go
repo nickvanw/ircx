@@ -175,6 +175,7 @@ func TestReconnect(t *testing.T) {
 	}
 
 	b := Classic(l.Addr().String(), "test-bot")
+	b.Config.MaxRetries = 2
 
 	not := make(chan struct{})
 	go dcHelper(l, not)
