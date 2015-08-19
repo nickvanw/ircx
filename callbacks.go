@@ -56,10 +56,6 @@ type Handler interface {
 	Handle(Sender, *irc.Message)
 }
 
-type Sender interface {
-	Send(*irc.Message) error
-}
-
 type HandlerFunc func(s Sender, m *irc.Message)
 
 func (f HandlerFunc) Handle(s Sender, m *irc.Message) {
