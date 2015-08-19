@@ -29,7 +29,7 @@ func TestNew(t *testing.T) {
 		t.Fatalf("Wanted user %s, got %s", "test-user", b.Config.User)
 	}
 	if !reflect.DeepEqual(b.Config.Options, wantOpts) {
-		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Config.Options)
+		t.Fatalf("Wanted config options %#v, got %#v", wantOpts, b.Config.Options)
 	}
 }
 
@@ -48,7 +48,7 @@ func TestClassicHelper(t *testing.T) {
 		t.Fatalf("Wanted user %s, got %s", "test-bot", b.Config.User)
 	}
 	if !reflect.DeepEqual(b.Config.Options, wantOpts) {
-		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Config.Options)
+		t.Fatalf("Wanted config options %#v, got %#v", wantOpts, b.Config.Options)
 	}
 }
 
@@ -70,7 +70,7 @@ func TestPasswordHelper(t *testing.T) {
 		t.Fatalf("Wanted password %s, got %s", "test-password", b.Config.Password)
 	}
 	if !reflect.DeepEqual(b.Config.Options, wantOpts) {
-		t.Fatalf("Wanted config options %s, got %s", wantOpts, b.Config.Options)
+		t.Fatalf("Wanted config options %#v, got %#v", wantOpts, b.Config.Options)
 	}
 }
 
