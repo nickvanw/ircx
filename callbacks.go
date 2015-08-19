@@ -1,55 +1,41 @@
 package ircx
 
 import (
-	"errors"
-
 	"github.com/sorcix/irc"
 )
 
-var ErrInvalidHandler = errors.New("invalid handler specified for callback")
-
-// messageCallback is called on every message recieved from the IRC
-// server, checking to see if there are any actions that need to be performed
-func (b *Bot) messageCallback(m *irc.Message) {
-	if data, ok := b.callbacks[m.Command]; ok {
-		for _, v := range data {
-			go v.Handler.Handle(v.Sender, m)
-		}
+func (b *Bot) onMessage(m *irc.Message) {
+	handlers, ok := b.handlers[m.Command]
+	if !ok {
+		return
+	}
+	for _, h := range handlers {
+		go h.Handle(b.Sender, m)
 	}
 }
 
-// AddCallback is used to add a callback method for a given action
-func (b *Bot) AddCallback(value string, c Callback) error {
-	if c.Handler == nil {
-		return ErrInvalidHandler
-	}
-	if c.Sender == nil {
-		c.Sender = b.Sender // if no sender is specified, use default
-	}
-	b.callbacks[value] = append(b.callbacks[value], c)
-	return nil
+// Handle registers the handler for the given command
+func (b *Bot) Handle(cmd string, handler Handler) {
+	b.handlers[cmd] = append(b.handlers[cmd], handler)
 }
 
-// CallbackLoop reads from the ReadLoop channel and initiates a
-// callback check for every message it recieves.
-func (b *Bot) CallbackLoop() {
+// Handle registers the handler function for the given command
+func (b *Bot) HandleFunc(cmd string, handler func(s Sender, m *irc.Message)) {
+	b.handlers[cmd] = append(b.handlers[cmd], HandlerFunc(handler))
+}
+
+// HandleLoop reads from the ReadLoop channel and initiates a handler check
+// for every message it recieves.
+func (b *Bot) HandleLoop() {
 	for {
 		select {
 		case msg, ok := <-b.Data:
-			if ok {
-				b.messageCallback(msg)
-			} else {
+			if !ok {
 				return
 			}
+			b.onMessage(msg)
 		}
 	}
-}
-
-// Callback represents a Handler and a Sender for
-// a specified callback
-type Callback struct {
-	Handler Handler
-	Sender  Sender
 }
 
 type Handler interface {

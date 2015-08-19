@@ -15,7 +15,7 @@ type Bot struct {
 	Config       Config
 	Data         chan *irc.Message
 	Sender       ServerSender
-	callbacks    map[string][]Callback
+	handlers     map[string][]Handler
 	reader       *irc.Decoder
 	writer       *irc.Encoder
 	conn         net.Conn
@@ -36,7 +36,7 @@ func New(server, name string, config Config) *Bot {
 		OriginalName: name,
 		Config:       config,
 		Data:         make(chan *irc.Message),
-		callbacks:    make(map[string][]Callback),
+		handlers:     make(map[string][]Handler),
 		tries:        0,
 	}
 	return b

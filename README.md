@@ -33,13 +33,13 @@ func main() {
 		log.Panicln("Unable to dial IRC Server ", err)
 	}
 	RegisterHandlers(bot)
-	bot.CallbackLoop()
+	bot.HandleLoop()
 	log.Println("Exiting..")
 }
 
 func RegisterHandlers(bot *ircx.Bot) {
-	bot.AddCallback(irc.RPL_WELCOME, ircx.Callback{Handler: ircx.HandlerFunc(RegisterConnect)})
-	bot.AddCallback(irc.PING, ircx.Callback{Handler: ircx.HandlerFunc(PingHandler)})
+	bot.HandleFunc(irc.RPL_WELCOME, RegisterConnect)
+	bot.HandleFunc(irc.PING, PingHandler)
 }
 
 func RegisterConnect(s ircx.Sender, m *irc.Message) {
