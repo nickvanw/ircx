@@ -69,6 +69,28 @@ func (b *Bot) Connect() error {
 	return nil
 }
 
+// connectMessages is a list of IRC messages to send when attempting to
+// connect to the IRC server.
+func (b *Bot) connectMessages() []*irc.Message {
+	messages := []*irc.Message{}
+	if b.Config.Password != "" {
+		messages = append(messages, &irc.Message{
+			Command: irc.PASS,
+			Params:  []string{b.Config.Password},
+		})
+	}
+	messages = append(messages, &irc.Message{
+		Command: irc.NICK,
+		Params:  []string{b.OriginalName},
+	})
+	messages = append(messages, &irc.Message{
+		Command:  irc.USER,
+		Params:   []string{b.Config.User, "0", "*"},
+		Trailing: b.Config.User,
+	})
+	return messages
+}
+
 // Reconnect checks to make sure we want to, and then attempts to
 // reconnect to the server
 func (b *Bot) Reconnect() {
