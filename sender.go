@@ -2,6 +2,10 @@ package ircx
 
 import "github.com/sorcix/irc"
 
+type Sender interface {
+	Send(*irc.Message) error
+}
+
 // ServerSender is a barebones writer used
 // as the default sender for all callbacks
 type ServerSender struct {
