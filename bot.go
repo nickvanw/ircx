@@ -14,7 +14,7 @@ type Bot struct {
 	OriginalName string
 	Config       Config
 	Data         chan *irc.Message
-	Sender       ServerSender
+	Sender       Sender
 	handlers     map[string][]Handler
 	reader       *irc.Decoder
 	writer       *irc.Encoder
@@ -57,7 +57,7 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
-	b.Sender = ServerSender{writer: b.writer}
+	b.Sender = serverSender{writer: b.writer}
 	for _, msg := range b.connectMessages() {
 		if err := b.writer.Encode(msg); err != nil {
 			return err

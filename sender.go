@@ -7,12 +7,12 @@ type Sender interface {
 	Send(*irc.Message) error
 }
 
-// ServerSender is a barebones writer used
+// serverSender is a barebones writer used
 // as the default sender for all callbacks
-type ServerSender struct {
+type serverSender struct {
 	writer *irc.Encoder
 }
 
-func (m ServerSender) Send(msg *irc.Message) error {
+func (m serverSender) Send(msg *irc.Message) error {
 	return m.writer.Encode(msg)
 }
