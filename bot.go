@@ -25,7 +25,6 @@ type Bot struct {
 type Config struct {
 	Password   string
 	User       string
-	Options    map[string]bool
 	TLSConfig  *tls.Config
 	MaxRetries int
 }

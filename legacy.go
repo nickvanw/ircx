@@ -8,15 +8,13 @@ import (
 // with the given IRC name.
 func Classic(server string, name string) *Bot {
 	cfg := Config{
-		Options: map[string]bool{"connected": true},
-		User:    name,
+		User: name,
 	}
 	return New(server, name, cfg)
 }
 
 func WithLogin(server string, name string, user string, password string) *Bot {
 	cfg := Config{
-		Options:  map[string]bool{"connected": true},
 		User:     user,
 		Password: password,
 	}
@@ -31,7 +29,6 @@ func WithTLS(server string, name string, tlsConfig *tls.Config) *Bot {
 		tlsConfig = &tls.Config{}
 	}
 	cfg := Config{
-		Options:   map[string]bool{"connected": true},
 		TLSConfig: tlsConfig,
 		User:      name,
 	}
@@ -43,7 +40,6 @@ func WithLoginTLS(server string, name string, user string, password string, tlsC
 		tlsConfig = &tls.Config{}
 	}
 	cfg := Config{
-		Options:   map[string]bool{"connected": true},
 		TLSConfig: tlsConfig,
 		User:      user,
 		Password:  password,
