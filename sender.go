@@ -10,10 +10,9 @@ type Sender interface {
 // ServerSender is a barebones writer used
 // as the default sender for all callbacks
 type ServerSender struct {
-	writer **irc.Encoder
+	writer *irc.Encoder
 }
 
 func (m ServerSender) Send(msg *irc.Message) error {
-	writer := *m.writer
-	return writer.Encode(msg)
+	return m.writer.Encode(msg)
 }

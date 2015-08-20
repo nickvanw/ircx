@@ -57,7 +57,7 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
-	b.Sender = ServerSender{writer: &b.writer}
+	b.Sender = ServerSender{writer: b.writer}
 	for _, msg := range b.connectMessages() {
 		if err := b.writer.Encode(msg); err != nil {
 			return err
