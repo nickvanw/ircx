@@ -14,8 +14,8 @@ type Bot struct {
 	OriginalName string
 	Config       Config
 	Data         chan *irc.Message
-	Sender       ServerSender
-	callbacks    map[string][]Callback
+	Sender       Sender
+	handlers     map[string][]Handler
 	reader       *irc.Decoder
 	writer       *irc.Encoder
 	conn         net.Conn
@@ -25,7 +25,6 @@ type Bot struct {
 type Config struct {
 	Password   string
 	User       string
-	Options    map[string]bool
 	TLSConfig  *tls.Config
 	MaxRetries int
 }
@@ -36,7 +35,7 @@ func New(server, name string, config Config) *Bot {
 		OriginalName: name,
 		Config:       config,
 		Data:         make(chan *irc.Message),
-		callbacks:    make(map[string][]Callback),
+		handlers:     make(map[string][]Handler),
 		tries:        0,
 	}
 	return b
@@ -57,7 +56,7 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
-	b.Sender = ServerSender{writer: &b.writer}
+	b.Sender = serverSender{writer: b.writer}
 	for _, msg := range b.connectMessages() {
 		if err := b.writer.Encode(msg); err != nil {
 			return err
@@ -118,4 +117,48 @@ func (b *Bot) ReadLoop() error {
 		}
 		b.Data <- msg
 	}
+}
+
+func (b *Bot) onMessage(m *irc.Message) {
+	handlers, ok := b.handlers[m.Command]
+	if !ok {
+		return
+	}
+	for _, h := range handlers {
+		go h.Handle(b.Sender, m)
+	}
+}
+
+// Handle registers the handler for the given command
+func (b *Bot) Handle(cmd string, handler Handler) {
+	b.handlers[cmd] = append(b.handlers[cmd], handler)
+}
+
+// Handle registers the handler function for the given command
+func (b *Bot) HandleFunc(cmd string, handler func(s Sender, m *irc.Message)) {
+	b.handlers[cmd] = append(b.handlers[cmd], HandlerFunc(handler))
+}
+
+// HandleLoop reads from the ReadLoop channel and initiates a handler check
+// for every message it recieves.
+func (b *Bot) HandleLoop() {
+	for {
+		select {
+		case msg, ok := <-b.Data:
+			if !ok {
+				return
+			}
+			b.onMessage(msg)
+		}
+	}
+}
+
+type Handler interface {
+	Handle(Sender, *irc.Message)
+}
+
+type HandlerFunc func(s Sender, m *irc.Message)
+
+func (f HandlerFunc) Handle(s Sender, m *irc.Message) {
+	f(s, m)
 }
