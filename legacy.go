@@ -13,6 +13,8 @@ func Classic(server string, name string) *Bot {
 	return New(server, name, cfg)
 }
 
+// WithLogin creates an instance with the specified server, name user and password
+// for the IRC server
 func WithLogin(server string, name string, user string, password string) *Bot {
 	cfg := Config{
 		User:     user,
@@ -35,6 +37,7 @@ func WithTLS(server string, name string, tlsConfig *tls.Config) *Bot {
 	return New(server, name, cfg)
 }
 
+// WithLoginTLS creates an instance with the specified information + TLS config
 func WithLoginTLS(server string, name string, user string, password string, tlsConfig *tls.Config) *Bot {
 	if tlsConfig == nil {
 		tlsConfig = &tls.Config{}

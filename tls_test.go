@@ -33,13 +33,13 @@ func TestTLSConnect(t *testing.T) {
 	priv, _ := rsa.GenerateKey(rand.Reader, 1024)
 	pub := &priv.PublicKey
 
-	ca_b, err := x509.CreateCertificate(rand.Reader, ca, ca, pub, priv)
+	cab, err := x509.CreateCertificate(rand.Reader, ca, ca, pub, priv)
 	if err != nil {
 		t.Fatalf("error generating self-cert: %v", err)
 	}
 
 	cert := tls.Certificate{
-		Certificate: [][]byte{ca_b},
+		Certificate: [][]byte{cab},
 		PrivateKey:  priv,
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/sorcix/irc"
 )
 
+// Bot contains all of the information necessary to run a single IRC client
 type Bot struct {
 	Server       string
 	OriginalName string
@@ -22,6 +23,7 @@ type Bot struct {
 	tries        int
 }
 
+// Config contains optional configuration options for an IRC Bot
 type Config struct {
 	Password   string
 	User       string
@@ -29,6 +31,7 @@ type Config struct {
 	MaxRetries int
 }
 
+// New creates a new IRC bot with the specified server, name and config
 func New(server, name string, config Config) *Bot {
 	b := &Bot{
 		Server:       server,
@@ -100,9 +103,8 @@ func (b *Bot) Reconnect() error {
 			time.Sleep(duration)
 		}
 		return err
-	} else {
-		close(b.Data)
 	}
+	close(b.Data)
 	return nil
 }
 
@@ -134,7 +136,7 @@ func (b *Bot) Handle(cmd string, handler Handler) {
 	b.handlers[cmd] = append(b.handlers[cmd], handler)
 }
 
-// Handle registers the handler function for the given command
+// HandleFunc registers the handler function for the given command
 func (b *Bot) HandleFunc(cmd string, handler func(s Sender, m *irc.Message)) {
 	b.handlers[cmd] = append(b.handlers[cmd], HandlerFunc(handler))
 }
@@ -153,12 +155,15 @@ func (b *Bot) HandleLoop() {
 	}
 }
 
+// Handler is an interface to handle IRC messages
 type Handler interface {
 	Handle(Sender, *irc.Message)
 }
 
+// HandlerFunc is a type that represents the method necessary to implement Handler
 type HandlerFunc func(s Sender, m *irc.Message)
 
+// Handle calls the HandlerFunc with the sender and irc message
 func (f HandlerFunc) Handle(s Sender, m *irc.Message) {
 	f(s, m)
 }
