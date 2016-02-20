@@ -37,7 +37,7 @@ func New(server, name string, config Config) *Bot {
 		Server:       server,
 		OriginalName: name,
 		Config:       config,
-		Data:         make(chan *irc.Message),
+		Data:         make(chan *irc.Message, 10), // buffer 10 messages
 		handlers:     make(map[string][]Handler),
 		tries:        0,
 	}
@@ -127,7 +127,7 @@ func (b *Bot) onMessage(m *irc.Message) {
 		return
 	}
 	for _, h := range handlers {
-		go h.Handle(b.Sender, m)
+		h.Handle(b.Sender, m)
 	}
 }
 
