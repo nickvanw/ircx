@@ -144,14 +144,8 @@ func (b *Bot) HandleFunc(cmd string, handler func(s Sender, m *irc.Message)) {
 // HandleLoop reads from the ReadLoop channel and initiates a handler check
 // for every message it recieves.
 func (b *Bot) HandleLoop() {
-	for {
-		select {
-		case msg, ok := <-b.Data:
-			if !ok {
-				return
-			}
-			b.onMessage(msg)
-		}
+	for msg := range b.Data {
+		b.onMessage(msg)
 	}
 }
 
