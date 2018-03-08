@@ -120,7 +120,7 @@ func (b *Bot) Reconnect() error {
 			if err := b.Connect(); err != nil {
 				b.tries++
 				duration := time.Duration(math.Pow(2.0, float64(b.tries))*200) * time.Millisecond
-				level.Error(b.Logger()).Log("action", "reconnect_wait", "delay", duration, "error", err)
+				level.Error(b.Logger()).Log("action", "reconnect_error", "delay", duration, "error", err)
 				time.Sleep(duration)
 			} else {
 				break
@@ -142,7 +142,7 @@ func (b *Bot) ReadLoop() error {
 			level.Error(b.Logger()).Log("action", "readloop", "error", err)
 			return b.Reconnect()
 		}
-		level.Debug(b.log).Log("action", "recv", "message", msg.String())
+		level.Debug(b.log).Log("action", "read", "message", msg.String())
 		b.Data <- msg
 	}
 }
