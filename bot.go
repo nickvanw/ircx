@@ -12,6 +12,8 @@ import (
 	"github.com/sorcix/irc"
 )
 
+var defaultLogger = log.NewNopLogger()
+
 // Bot contains all of the information necessary to run a single IRC client
 type Bot struct {
 	Server       string
@@ -79,7 +81,7 @@ func (b *Bot) Connect() error {
 
 func (b *Bot) Logger() log.Logger {
 	if b.log == nil {
-		return log.NewNopLogger()
+		return defaultLogger
 	}
 	return b.log
 }
