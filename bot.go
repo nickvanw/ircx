@@ -2,12 +2,17 @@ package ircx
 
 import (
 	"crypto/tls"
+	"errors"
 	"math"
 	"net"
 	"time"
 
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/sorcix/irc"
 )
+
+var defaultLogger = log.NewNopLogger()
 
 // Bot contains all of the information necessary to run a single IRC client
 type Bot struct {
@@ -21,6 +26,8 @@ type Bot struct {
 	writer       *irc.Encoder
 	conn         net.Conn
 	tries        int
+
+	log log.Logger
 }
 
 // Config contains optional configuration options for an IRC Bot
@@ -59,15 +66,28 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
-	b.Sender = serverSender{writer: b.writer}
+	b.Sender = serverSender{writer: b.writer, logger: b.Logger}
 	for _, msg := range b.connectMessages() {
+		level.Debug(b.Logger()).Log("action", "send", "message", msg.String())
 		if err := b.writer.Encode(msg); err != nil {
+			level.Error(b.Logger()).Log("action", "send", "error", err)
 			return err
 		}
 	}
 	b.tries = 0
 	go b.ReadLoop()
 	return nil
+}
+
+func (b *Bot) Logger() log.Logger {
+	if b.log == nil {
+		return defaultLogger
+	}
+	return b.log
+}
+
+func (b *Bot) SetLogger(l log.Logger) {
+	b.log = l
 }
 
 // connectMessages is a list of IRC messages to send when attempting to
@@ -97,12 +117,18 @@ func (b *Bot) connectMessages() []*irc.Message {
 func (b *Bot) Reconnect() error {
 	if b.Config.MaxRetries > 0 {
 		b.conn.Close()
-		var err error
-		for err = b.Connect(); err != nil && b.tries < b.Config.MaxRetries; b.tries++ {
-			duration := time.Duration(math.Pow(2.0, float64(b.tries))*200) * time.Millisecond
-			time.Sleep(duration)
+		for b.tries < b.Config.MaxRetries {
+			level.Info(b.Logger()).Log("action", "reconnect", "server", b.Server)
+			if err := b.Connect(); err != nil {
+				b.tries++
+				duration := time.Duration(math.Pow(2.0, float64(b.tries))*200) * time.Millisecond
+				level.Error(b.Logger()).Log("action", "reconnect_error", "delay", duration, "error", err)
+				time.Sleep(duration)
+			} else {
+				break
+			}
 		}
-		return err
+		return errors.New("Too many reconnects")
 	}
 	close(b.Data)
 	return nil
@@ -115,8 +141,10 @@ func (b *Bot) ReadLoop() error {
 		b.conn.SetDeadline(time.Now().Add(300 * time.Second))
 		msg, err := b.reader.Decode()
 		if err != nil {
+			level.Error(b.Logger()).Log("action", "readloop", "error", err)
 			return b.Reconnect()
 		}
+		level.Debug(b.log).Log("action", "read", "message", msg.String())
 		b.Data <- msg
 	}
 }
