@@ -66,7 +66,7 @@ func (b *Bot) Connect() error {
 	b.conn = conn
 	b.reader = irc.NewDecoder(conn)
 	b.writer = irc.NewEncoder(conn)
-	b.Sender = serverSender{writer: b.writer, logger: b.log}
+	b.Sender = serverSender{writer: b.writer, logger: b.Logger}
 	for _, msg := range b.connectMessages() {
 		level.Debug(b.Logger()).Log("action", "send", "message", msg.String())
 		if err := b.writer.Encode(msg); err != nil {

@@ -17,11 +17,11 @@ type Sender interface {
 type serverSender struct {
 	writer *irc.Encoder
 
-	logger log.Logger
+	logger func() log.Logger
 }
 
 // Send sends the specified message
 func (m serverSender) Send(msg *irc.Message) error {
-	level.Debug(m.logger).Log("action", "send", "message", msg.String())
+	level.Debug(m.logger()).Log("action", "send", "message", msg.String())
 	return m.writer.Encode(msg)
 }
