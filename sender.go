@@ -1,6 +1,10 @@
 package ircx
 
-import "github.com/sorcix/irc"
+import (
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
+	"github.com/sorcix/irc"
+)
 
 // Sender is an interface for sending IRC messages
 type Sender interface {
@@ -12,9 +16,12 @@ type Sender interface {
 // as the default sender for all callbacks
 type serverSender struct {
 	writer *irc.Encoder
+
+	logger log.Logger
 }
 
 // Send sends the specified message
 func (m serverSender) Send(msg *irc.Message) error {
+	level.Debug(m.logger).Log("action", "send", "message", msg.String())
 	return m.writer.Encode(msg)
 }
