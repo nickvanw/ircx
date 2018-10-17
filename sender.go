@@ -3,7 +3,7 @@ package ircx
 import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/sorcix/irc"
+	"gopkg.in/sorcix/irc.v2"
 )
 
 // Sender is an interface for sending IRC messages

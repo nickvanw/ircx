@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/sorcix/irc"
+	"gopkg.in/sorcix/irc.v2"
 )
 
 var defaultLogger = log.NewNopLogger()
@@ -105,9 +105,8 @@ func (b *Bot) connectMessages() []*irc.Message {
 		Params:  []string{b.OriginalName},
 	})
 	messages = append(messages, &irc.Message{
-		Command:  irc.USER,
-		Params:   []string{b.Config.User, "0", "*"},
-		Trailing: b.Config.User,
+		Command: irc.USER,
+		Params:  []string{b.Config.User, "0", "*", b.Config.User},
 	})
 	return messages
 }
