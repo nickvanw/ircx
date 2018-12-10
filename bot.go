@@ -144,6 +144,9 @@ func (b *Bot) ReadLoop() error {
 			level.Error(b.Logger()).Log("action", "readloop", "error", err)
 			return b.Reconnect()
 		}
+		if msg == nil {
+			continue // invalid message
+		}
 		level.Debug(b.log).Log("action", "read", "message", msg.String())
 		b.Data <- msg
 	}
