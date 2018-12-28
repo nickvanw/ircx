@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/sorcix/irc"
+	"gopkg.in/sorcix/irc.v1"
 )
 
 var defaultLogger = log.NewNopLogger()
