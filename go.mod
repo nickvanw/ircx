@@ -1,4 +1,4 @@
-module github.com/nickvanw/ircx
+module github.com/nickvanw/ircx/v2
 
 go 1.10
 
@@ -14,8 +14,6 @@ require (
 	github.com/client9/misspell v0.3.4 // indirect
 	github.com/fatih/gomodifytags v0.0.0-20180914191908-141225bf62b6 // indirect
 	github.com/go-kit/kit v0.8.0
-	github.com/go-logfmt/logfmt v0.4.0 // indirect
-	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/lint v0.0.0-20181217174547-8f45f776aaf1 // indirect
 	github.com/google/shlex v0.0.0-20181106134648-c34317bd91bf // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20180909121442-1003c8bd00dc // indirect
@@ -25,6 +23,7 @@ require (
 	github.com/mdempsky/unconvert v0.0.0-20180703203632-1a9a0a0a3594 // indirect
 	github.com/mibk/dupl v1.0.0 // indirect
 	github.com/nicksnyder/go-i18n v1.10.0 // indirect
+	github.com/nickvanw/ircx v0.0.0-20190104230957-b8ba1369554e
 	github.com/nsf/gocode v0.0.0-20181120081338-6cac7c69a41e // indirect
 	github.com/opennota/check v0.0.0-20180911053232-0c771f5545ff // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect

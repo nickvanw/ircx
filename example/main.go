@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/nickvanw/ircx"
+	"github.com/nickvanw/ircx/v2"
 	irc "gopkg.in/sorcix/irc.v2"
 )
 
@@ -42,8 +42,7 @@ func RegisterConnect(s ircx.Sender, m *irc.Message) {
 
 func PingHandler(s ircx.Sender, m *irc.Message) {
 	s.Send(&irc.Message{
-		Command:  irc.PONG,
-		Params:   m.Params,
-		Trailing: m.Trailing,
+		Command: irc.PONG,
+		Params:  m.Params,
 	})
 }
