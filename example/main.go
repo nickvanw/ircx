@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/nickvanw/ircx/v2"
+	"github.com/sirupsen/logrus"
 	irc "gopkg.in/sorcix/irc.v2"
 )
 
@@ -20,6 +21,7 @@ func init() {
 
 func main() {
 	bot := ircx.Classic(*server, *name)
+	logrus.SetLevel(logrus.DebugLevel)
 	if err := bot.Connect(); err != nil {
 		log.Panicln("Unable to dial IRC Server ", err)
 	}
