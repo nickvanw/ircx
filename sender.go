@@ -1,8 +1,7 @@
 package ircx
 
 import (
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	log "github.com/sirupsen/logrus"
 	irc "gopkg.in/sorcix/irc.v2"
 )
 
@@ -17,11 +16,11 @@ type Sender interface {
 type serverSender struct {
 	writer *irc.Encoder
 
-	logger func() log.Logger
+	logger func() log.FieldLogger
 }
 
 // Send sends the specified message
 func (m serverSender) Send(msg *irc.Message) error {
-	level.Debug(m.logger()).Log("action", "send", "message", msg.String())
+	m.logger().WithField("message", msg.String()).Debug("sending message")
 	return m.writer.Encode(msg)
 }

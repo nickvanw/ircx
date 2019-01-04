@@ -7,12 +7,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	log "github.com/sirupsen/logrus"
 	irc "gopkg.in/sorcix/irc.v2"
 )
-
-var defaultLogger = log.NewNopLogger()
 
 // Bot contains all of the information necessary to run a single IRC client
 type Bot struct {
@@ -27,7 +24,7 @@ type Bot struct {
 	conn         net.Conn
 	tries        int
 
-	log log.Logger
+	log log.FieldLogger
 }
 
 // Config contains optional configuration options for an IRC Bot
@@ -68,9 +65,9 @@ func (b *Bot) Connect() error {
 	b.writer = irc.NewEncoder(conn)
 	b.Sender = serverSender{writer: b.writer, logger: b.Logger}
 	for _, msg := range b.connectMessages() {
-		level.Debug(b.Logger()).Log("action", "send", "message", msg.String())
+		b.Logger().WithField("action", "send").Debug(msg.String())
 		if err := b.writer.Encode(msg); err != nil {
-			level.Error(b.Logger()).Log("action", "send", "error", err)
+			b.Logger().WithField("action", "send").WithError(err).Error("error sending message")
 			return err
 		}
 	}
@@ -79,14 +76,16 @@ func (b *Bot) Connect() error {
 	return nil
 }
 
-func (b *Bot) Logger() log.Logger {
+// Logger returns the configured logger for this bot, or the `logrus` standard logger
+func (b *Bot) Logger() log.FieldLogger {
 	if b.log == nil {
-		return defaultLogger
+		return log.StandardLogger()
 	}
 	return b.log
 }
 
-func (b *Bot) SetLogger(l log.Logger) {
+// SetLogger accepts a log that complies with logrus' FieldLogger
+func (b *Bot) SetLogger(l log.FieldLogger) {
 	b.log = l
 }
 
@@ -116,12 +115,17 @@ func (b *Bot) connectMessages() []*irc.Message {
 func (b *Bot) Reconnect() error {
 	if b.Config.MaxRetries > 0 {
 		b.conn.Close()
+		fields := log.Fields{
+			"action": "reconnect",
+			"server": b.Server,
+		}
+		ll := b.Logger().WithFields(fields)
 		for b.tries < b.Config.MaxRetries {
-			level.Info(b.Logger()).Log("action", "reconnect", "server", b.Server)
+			ll.Info("reconnecting")
 			if err := b.Connect(); err != nil {
 				b.tries++
 				duration := time.Duration(math.Pow(2.0, float64(b.tries))*200) * time.Millisecond
-				level.Error(b.Logger()).Log("action", "reconnect_error", "delay", duration, "error", err)
+				ll.WithError(err).WithField("delay", duration).Error("failed to reconnect")
 				time.Sleep(duration)
 			} else {
 				break
@@ -140,13 +144,13 @@ func (b *Bot) ReadLoop() error {
 		b.conn.SetDeadline(time.Now().Add(300 * time.Second))
 		msg, err := b.reader.Decode()
 		if err != nil {
-			level.Error(b.Logger()).Log("action", "readloop", "error", err)
+			b.Logger().WithError(err).Error("unable to connect, reconnecting")
 			return b.Reconnect()
 		}
 		if msg == nil {
 			continue // invalid message
 		}
-		level.Debug(b.Logger()).Log("action", "read", "message", msg.String())
+		b.Logger().WithField("action", "readloop").WithField("message", msg.String()).Debug("read message")
 		b.Data <- msg
 	}
 }
