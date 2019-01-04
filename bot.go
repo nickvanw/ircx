@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/sorcix/irc"
+	"gopkg.in/sorcix/irc.v1"
 )
 
 var defaultLogger = log.NewNopLogger()
@@ -147,7 +147,7 @@ func (b *Bot) ReadLoop() error {
 		if msg == nil {
 			continue // invalid message
 		}
-		level.Debug(b.log).Log("action", "read", "message", msg.String())
+		level.Debug(b.Logger()).Log("action", "read", "message", msg.String())
 		b.Data <- msg
 	}
 }

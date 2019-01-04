@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/nickvanw/ircx"
-	"github.com/sorcix/irc"
+	"gopkg.in/sorcix/irc.v1"
 )
 
 var (
