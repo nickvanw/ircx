@@ -3,6 +3,7 @@ package ircx
 import (
 	"crypto/tls"
 	"errors"
+	"io/ioutil"
 	"math"
 	"net"
 	"time"
@@ -10,6 +11,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	irc "gopkg.in/sorcix/irc.v2"
 )
+
+var defaultLog = log.New()
+
+func init() {
+	defaultLog.SetOutput(ioutil.Discard)
+}
 
 // Bot contains all of the information necessary to run a single IRC client
 type Bot struct {
@@ -79,7 +86,7 @@ func (b *Bot) Connect() error {
 // Logger returns the configured logger for this bot, or the `logrus` standard logger
 func (b *Bot) Logger() log.FieldLogger {
 	if b.log == nil {
-		return log.StandardLogger()
+		return defaultLog
 	}
 	return b.log
 }

@@ -21,6 +21,7 @@ func init() {
 
 func main() {
 	bot := ircx.Classic(*server, *name)
+	bot.SetLogger(logrus.StandardLogger())
 	logrus.SetLevel(logrus.DebugLevel)
 	if err := bot.Connect(); err != nil {
 		log.Panicln("Unable to dial IRC Server ", err)
